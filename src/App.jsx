@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import * as api from './api.js';
 import { makeT } from './i18n.js';
 import Login from './components/Login.jsx';
+import LangSwitch from './components/LangSwitch.jsx';
 import Dashboard from './components/Dashboard.jsx';
 import Assets from './components/Assets.jsx';
 import Settings from './components/Settings.jsx';
@@ -118,10 +119,9 @@ export default function App() {
     [flash, handleError, load, t],
   );
 
-  const toggleLang = () => setLang((l) => (l === 'am' ? 'en' : 'am'));
 
   if (!authed) {
-    return <Login t={t} onLogin={() => setAuthed(true)} onToggleLang={toggleLang} />;
+    return <Login t={t} onLogin={() => setAuthed(true)} lang={lang} setLang={setLang} />;
   }
 
   // Already opened as the installed app? Then no install button.
@@ -152,9 +152,7 @@ export default function App() {
               ⬇ <span className="install-label">{t('install')}</span>
             </button>
           )}
-          <button className="chip" onClick={toggleLang}>
-            {t('language')}
-          </button>
+          <LangSwitch lang={lang} setLang={setLang} />
         </div>
       </header>
 

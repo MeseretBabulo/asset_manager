@@ -344,3 +344,14 @@ em.pos, em.neg { font-style: normal; font-weight: 700; }
 /* ---------- install help ---------- */
 .install-help ol { padding-left: 20px; display: grid; gap: 10px; line-height: 1.5; }
 @media (max-width: 380px) { .install-label { display: none; } }
+
+/* ---------- language switch (active language highlighted) ---------- */
+.lang-switch { display: flex; gap: 2px; padding: 3px; border-radius: 999px; background: rgba(255, 255, 255, 0.15); flex: none; }
+.lang-switch button {
+  border: 0; background: transparent; color: #fff; border-radius: 999px; min-height: 32px; min-width: 42px;
+  padding: 4px 10px; font-weight: 700; font-size: 0.9rem; opacity: 0.8;
+}
+.lang-switch button.on { background: #fff; color: var(--green); opacity: 1; }
+.login .lang-switch { background: var(--line); }
+.login .lang-switch button { color: var(--text); }
+.login .lang-switch button.on { background: var(--green); color: #fff; }

@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { login } from '../api.js';
+import LangSwitch from './LangSwitch.jsx';
 
-export default function Login({ t, onLogin, onToggleLang }) {
+export default function Login({ t, lang, setLang, onLogin }) {
   const [pin, setPin] = useState('');
   const [error, setError] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -22,9 +23,7 @@ export default function Login({ t, onLogin, onToggleLang }) {
 
   return (
     <div className="login">
-      <button className="chip login-lang" onClick={onToggleLang}>
-        {t('language')}
-      </button>
+      <LangSwitch lang={lang} setLang={setLang} className="login-lang" />
       <img src="/icons/icon-192.png" alt="" width="96" height="96" />
       <h1>{t('appName')}</h1>
       <form onSubmit={submit}>
