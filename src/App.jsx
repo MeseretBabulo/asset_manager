@@ -26,6 +26,7 @@ export default function App() {
   const [form, setForm] = useState(null); // { kind: 'record'|'asset', item }
   const [toast, setToast] = useState('');
   const [installEvent, setInstallEvent] = useState(null);
+  const [installHelp, setInstallHelp] = useState(false);
 
   const t = useMemo(() => makeT(lang), [lang]);
 
@@ -123,7 +124,8 @@ export default function App() {
     return <Login t={t} onLogin={() => setAuthed(true)} onToggleLang={toggleLang} />;
   }
 
-  const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.navigator.standalone;
+  // Already opened as the installed app? Then no install button.
+  const isStandalone = window.matchMedia?.('(display-mode: standalone)').matches || window.navigator.standalone === true;
   const byOwner = (rows) => (ownerFilter === 'all' ? rows : rows.filter((r) => r.owner_id === ownerFilter));
   const defaultOwner = ownerFilter === 'all' ? owners[0]?.id : ownerFilter;
   const shared = { t, lang, owners, ownerFilter, setOwnerFilter, loading };
@@ -136,21 +138,18 @@ export default function App() {
           <span>{t('appName')}</span>
         </div>
         <div className="topbar-actions">
-          {installEvent && (
+          {!isStandalone && (
             <button
               className="chip chip-accent"
               onClick={async () => {
+                // Chrome/Edge with HTTPS: real install prompt. Anywhere else: show how to install.
+                if (!installEvent) return setInstallHelp(true);
                 installEvent.prompt();
                 await installEvent.userChoice;
                 setInstallEvent(null);
               }}
             >
-              ⬇ {t('install')}
-            </button>
-          )}
-          {!installEvent && isIos && (
-            <button className="chip" onClick={() => alert(t('iosInstall'))}>
-              ⬇
+              ⬇ <span className="install-label">{t('install')}</span>
             </button>
           )}
           <button className="chip" onClick={toggleLang}>
@@ -232,6 +231,31 @@ export default function App() {
           onDelete={(i) => del('assets', i)}
           onClose={() => setForm(null)}
         />
+      )}
+
+      {installHelp && (
+        <div className="sheet-backdrop" onClick={() => setInstallHelp(false)}>
+          <div className="sheet install-help" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
+            <div className="sheet-head">
+              <h2>⬇ {t('installTitle')}</h2>
+              <button className="icon-btn" onClick={() => setInstallHelp(false)} aria-label="close">
+                ✕
+              </button>
+            </div>
+            <ol>
+              <li>📱 <b>Android:</b> {t('installAndroid')}</li>
+              <li>🍏 <b>iPhone:</b> {t('installIphone')}</li>
+              <li>💻 <b>{t('installPcLabel')}:</b> {t('installDesktop')}</li>
+            </ol>
+            <p className="muted small">{t('installNote')}</p>
+            <div className="form-actions">
+              <span className="spacer" />
+              <button className="btn btn-primary" onClick={() => setInstallHelp(false)}>
+                {t('ok')}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {toast && <div className="toast">{toast}</div>}

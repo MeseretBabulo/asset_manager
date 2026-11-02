@@ -30,6 +30,9 @@ function summarize(records, types, atDate) {
 }
 
 function PriceLine({ t, r, types, today }) {
+  if (r.status === 'sold' && !r.sale_price) {
+    return <span className="neg">⚠️ {t('salePriceMissing')}</span>;
+  }
   if (r.status === 'sold') {
     const diff = (r.sale_price || 0) - r.buy_price;
     return (

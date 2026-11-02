@@ -340,3 +340,7 @@ em.pos, em.neg { font-style: normal; font-weight: 700; }
   flex: 1; border: 1px solid var(--line); background: var(--bg); border-radius: 12px; min-height: 48px; font-weight: 600; font-size: 0.85rem;
 }
 .unit-pick button.on { background: var(--green-soft); border-color: var(--green); color: var(--green); }
+
+/* ---------- install help ---------- */
+.install-help ol { padding-left: 20px; display: grid; gap: 10px; line-height: 1.5; }
+@media (max-width: 380px) { .install-label { display: none; } }
