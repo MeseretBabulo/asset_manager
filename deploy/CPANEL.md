@@ -38,6 +38,7 @@ cPanel → **Setup Node.js App** → **Create Application**:
 |---|---|
 | `APP_PIN` | your secret PIN, e.g. `4827` (not 1234!) |
 | `DATA_DIR` | `/home/USER/asset_manager_data` |
+| `WELL_KNOWN_DIR` | `/home/USER/public_html/.well-known` — the domain's document root + `/.well-known` (lets the free SSL certificate be issued) |
 
 Click **Create**.
 
@@ -71,5 +72,6 @@ Download that folder now and then from File Manager to keep an offline copy.
 | Page shows an error / 503 | File Manager → open `/home/USER/asset_manager/stderr.log` and read the last lines |
 | Log says **“needs Node.js 22.13 or newer”** | Setup Node.js App → pick the newest 22.x, **or** add env variable `NODE_OPTIONS` = `--experimental-sqlite` → Restart |
 | “Wrong PIN” | Check `APP_PIN` in Setup Node.js App → Restart after changing |
+| Let’s Encrypt / AutoSSL fails | Check `WELL_KNOWN_DIR` points to the domain’s document root + `/.well-known`, Restart, then run AutoSSL again |
 | No “Install app” on phone | The site must open with **https://** and a green lock (step 1) |
 | Photo upload fails | Photos are shrunk on the phone first; if it still fails, ask Namecheap support to raise the upload/request size limit |

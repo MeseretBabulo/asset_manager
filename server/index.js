@@ -341,6 +341,13 @@ app.use(
 // Photos (random, unguessable file names)
 app.use('/uploads', express.static(UPLOAD_DIR, { maxAge: '30d', immutable: true }));
 
+// SSL certificate checks (cPanel AutoSSL / Let's Encrypt) read files from <docroot>/.well-known.
+// Serve them when WELL_KNOWN_DIR is set, and never answer these paths with the app page.
+if (process.env.WELL_KNOWN_DIR) {
+  app.use('/.well-known', express.static(process.env.WELL_KNOWN_DIR, { dotfiles: 'allow' }));
+}
+app.use('/.well-known', (req, res) => res.status(404).type('text/plain').send('Not found'));
+
 // Built frontend (production)
 if (fs.existsSync(DIST_DIR)) {
   app.use(express.static(DIST_DIR, { index: false, maxAge: '1h' }));
