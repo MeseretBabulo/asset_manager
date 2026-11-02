@@ -1,0 +1,33 @@
+# Manual maintenance: check or fix SSL on the cPanel server (Actions tab → "Server SSL" → Run workflow).
+name: Server SSL
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "check = report only, fix = add DNS zone if needed + run AutoSSL"
+        type: choice
+        options: [check, fix]
+        default: check
+
+jobs:
+  ssl:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      HOST: ${{ secrets.CPANEL_HOST }}
+      PORT: ${{ secrets.CPANEL_PORT || '22' }}
+      USER: ${{ secrets.CPANEL_USER }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up SSH
+        env:
+          SSH_KEY: ${{ secrets.CPANEL_SSH_KEY }}
+        run: |
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/deploy_key && chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -p "$PORT" -H "$HOST" >> ~/.ssh/known_hosts 2>/dev/null
+      - name: Run on server (${{ inputs.mode }})
+        run: |
+          ssh -i ~/.ssh/deploy_key -p "$PORT" -o BatchMode=yes "$USER@$HOST" \
+            "MODE='${{ inputs.mode }}' bash -s" < deploy/ssl-fix.sh
