@@ -1,0 +1,88 @@
+# Build the app and deploy it to cPanel (Shock Hosting) on every push to main.
+# Setup: see deploy/AUTO-DEPLOY.md (4 GitHub secrets + 1 SSH key).
+name: Deploy to cPanel
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: # "Run workflow" button in the Actions tab
+
+concurrency:
+  group: deploy-cpanel
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      HOST: ${{ secrets.CPANEL_HOST }}
+      PORT: ${{ secrets.CPANEL_PORT || '22' }}
+      USER: ${{ secrets.CPANEL_USER }}
+      APP_ROOT: ${{ vars.CPANEL_APP_ROOT || 'asset_manager' }}
+      NODE_MAJOR: ${{ vars.CPANEL_NODE_VERSION || '24' }}
+      APP_URL: ${{ vars.APP_URL }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install & build
+        run: |
+          npm ci
+          npm run package:cpanel
+
+      - name: Check setup
+        id: cfg
+        env:
+          HAS_KEY: ${{ secrets.CPANEL_SSH_KEY != '' }}
+        run: |
+          if [ -n "$HOST" ] && [ -n "$USER" ] && [ "$HAS_KEY" = "true" ]; then
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Deploy skipped: add secrets CPANEL_HOST, CPANEL_USER, CPANEL_PORT, CPANEL_SSH_KEY (see deploy/AUTO-DEPLOY.md). The build itself passed."
+          fi
+
+      - name: Set up SSH
+        if: steps.cfg.outputs.ok == 'true'
+        env:
+          SSH_KEY: ${{ secrets.CPANEL_SSH_KEY }}
+        run: |
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/deploy_key && chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -p "$PORT" -H "$HOST" >> ~/.ssh/known_hosts 2>/dev/null
+          echo "SSH=ssh -i $HOME/.ssh/deploy_key -p $PORT -o BatchMode=yes $USER@$HOST" >> "$GITHUB_ENV"
+
+      - name: Upload app (data folder is never touched)
+        if: steps.cfg.outputs.ok == 'true'
+        run: |
+          # Replace code folders cleanly, keep node_modules / tmp / logs on the server.
+          $SSH "mkdir -p ~/$APP_ROOT && rm -rf ~/$APP_ROOT/dist ~/$APP_ROOT/server"
+          tar -czf - -C release/asset_manager . | $SSH "tar -xzf - -C ~/$APP_ROOT"
+
+      - name: Install packages & restart app
+        if: steps.cfg.outputs.ok == 'true'
+        run: |
+          $SSH "APP_ROOT='$APP_ROOT' NODE_MAJOR='$NODE_MAJOR' bash -s" <<'REMOTE'
+          set -e
+          cd ~/"$APP_ROOT"
+          source ~/nodevenv/"$APP_ROOT"/"$NODE_MAJOR"/bin/activate
+          npm install --omit=dev --no-audit --no-fund
+          mkdir -p tmp && touch tmp/restart.txt
+          # LiteSpeed/Passenger: stop the running process so the new code loads on the next request
+          pkill -u "$(whoami)" -f "^lsnode:.*/$APP_ROOT" || true
+          echo "Deployed $(date -u '+%Y-%m-%d %H:%M UTC')"
+          REMOTE
+
+      - name: Check the site answers
+        if: steps.cfg.outputs.ok == 'true' && env.APP_URL != ''
+        run: |
+          sleep 5
+          code=$(curl -sk -o /dev/null -w '%{http_code}' "$APP_URL")
+          echo "HTTP $code from $APP_URL"
+          [ "$code" = "200" ] || { echo "::error::Site did not answer 200 — check stderr.log in cPanel"; exit 1; }

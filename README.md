@@ -41,6 +41,10 @@ npm run build
 APP_PIN=2580 npm start   # http://localhost:3001
 ```
 
+## Auto-deploy (push → live)
+Every push to `main` builds the app on GitHub Actions and deploys it to cPanel over SSH.
+One-time setup: **[deploy/AUTO-DEPLOY.md](deploy/AUTO-DEPLOY.md)**.
+
 ## Deploy to cPanel (Namecheap Stellar etc.)
 ```bash
 npm run package:cpanel   # -> release/asset_manager-cpanel.zip
