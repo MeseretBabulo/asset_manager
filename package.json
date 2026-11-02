@@ -4,13 +4,16 @@
   "private": true,
   "type": "module",
   "description": "Simple livestock & property manager (English / Amharic), mobile-first PWA",
-  "engines": { "node": ">=22.13" },
+  "engines": {
+    "node": ">=22.13"
+  },
   "scripts": {
     "dev": "concurrently -k -n api,web \"npm:dev:api\" \"npm:dev:web\"",
     "dev:api": "node --disable-warning=ExperimentalWarning --watch server/index.js",
     "dev:web": "vite --host",
     "build": "vite build",
-    "start": "NODE_ENV=production node --disable-warning=ExperimentalWarning server/index.js"
+    "start": "NODE_ENV=production node --disable-warning=ExperimentalWarning server/index.js",
+    "package:cpanel": "vite build && node scripts/package-cpanel.mjs"
   },
   "dependencies": {
     "express": "^4.21.2"

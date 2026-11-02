@@ -41,6 +41,12 @@ npm run build
 APP_PIN=2580 npm start   # http://localhost:3001
 ```
 
+## Deploy to cPanel (Namecheap Stellar etc.)
+```bash
+npm run package:cpanel   # -> release/asset_manager-cpanel.zip
+```
+Upload the zip in cPanel and follow **[deploy/CPANEL.md](deploy/CPANEL.md)** (startup file `app.js`, Node 22.x).
+
 ## Deploy (Ubuntu 24.04 VPS)
 1. Point a domain (or free DuckDNS subdomain) A-record to the server IP.
 2. On the server:
