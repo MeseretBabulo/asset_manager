@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { ASSET_ICON, ASSET_TYPES, CATEGORIES, CATEGORY_ICON, STATUSES, typeName } from '../i18n.js';
+import { AREA_UNITS, ASSET_ICON, ASSET_TYPES, CATEGORIES, CATEGORY_ICON, STATUSES, STATUS_ICON, typeName } from '../i18n.js';
 import { addMonths, compressImage, forecastValue, formatDate, money, today } from '../utils.js';
 
 // ---------- Shared pieces ----------
@@ -155,9 +155,51 @@ export function RecordForm({ t, lang, item, owners, types, defaultOwner, locatio
   const valueIn12 = data.date ? forecastValue(preview, types, addMonths(now, 12)) : 0;
   const qty = Number(data.quantity) || 1;
 
+  const isSold = data.status === 'sold';
+  const salePrice = Number(data.sale_price) || 0;
+  const saleDiff = salePrice - (Number(data.buy_price) || 0);
+  const chooseStatus = (st) =>
+    setData((d) => ({ ...d, status: st, sale_date: st === 'sold' ? d.sale_date || today() : d.sale_date }));
+
+  // Status buttons (+ sell price when sold). Shown at the top when editing — that is when father sells.
+  const statusBlock = (
+    <div className={`field status-block ${isSold ? 'is-sold' : ''}`}>
+      <span>{t('status')}</span>
+      <div className="segmented status-seg">
+        {STATUSES.map((st) => (
+          <button type="button" key={st} className={`${data.status === st ? 'on' : ''} seg-${st}`} onClick={() => chooseStatus(st)}>
+            <span className="seg-icon">{STATUS_ICON[st]}</span>
+            {t(`st_${st}`)}
+          </button>
+        ))}
+      </div>
+      {isSold && (
+        <div className="sale-box">
+          <div className="grid-2">
+            <Field label={`${t('salePrice')} (${t('birr')})`} required>
+              <input type="number" inputMode="decimal" min="0" value={data.sale_price ?? ''} onChange={set('sale_price')} required />
+            </Field>
+            <Field label={t('saleDate')} required>
+              <input type="date" value={data.sale_date || ''} onChange={set('sale_date')} required />
+              {lang === 'am' && data.sale_date && <span className="hint">{formatDate(data.sale_date, 'am')}</span>}
+            </Field>
+          </div>
+          <div className="small">{t('saleHelp')}</div>
+          {salePrice > 0 && (
+            <div className={`sale-result ${saleDiff >= 0 ? 'pos' : 'neg'}`}>
+              {saleDiff >= 0 ? t('gainOnSale') : t('lossOnSale')}: {money(Math.abs(saleDiff))} {t('birr')}
+            </div>
+          )}
+        </div>
+      )}
+      {data.status === 'dead' && <div className="small neg">{t('deadNote')}</div>}
+    </div>
+  );
+
   function submit(e) {
     e.preventDefault();
-    if (!data.date || !data.receiver.trim() || !data.location.trim() || !data.animal_type || !data.owner_id) {
+    const saleMissing = isSold && (!(salePrice > 0) || !data.sale_date);
+    if (saleMissing || !data.date || !data.receiver.trim() || !data.location.trim() || !data.animal_type || !data.owner_id) {
       setShowErrors(true);
       return;
     }
@@ -167,6 +209,8 @@ export function RecordForm({ t, lang, item, owners, types, defaultOwner, locatio
   return (
     <Sheet title={item ? t('editRecord') : t('newRecord')} onClose={onClose}>
       <form onSubmit={submit} noValidate className={showErrors ? 'show-errors' : ''}>
+        {item && statusBlock}
+
         <OwnerPicker t={t} owners={owners} value={data.owner_id} onChange={set('owner_id')} />
 
         <div className="field">
@@ -255,15 +299,7 @@ export function RecordForm({ t, lang, item, owners, types, defaultOwner, locatio
           </datalist>
         </Field>
 
-        <Field label={t('status')}>
-          <select value={data.status} onChange={set('status')}>
-            {STATUSES.map((s) => (
-              <option key={s} value={s}>
-                {t(`st_${s}`)}
-              </option>
-            ))}
-          </select>
-        </Field>
+        {!item && statusBlock}
 
         <PhotoInput t={t} value={data.photo} onChange={set('photo')} />
 
@@ -281,7 +317,7 @@ export function RecordForm({ t, lang, item, owners, types, defaultOwner, locatio
 // ---------- Property / other asset ----------
 export function AssetForm({ t, item, owners, defaultOwner, locations, onSave, onDelete, onClose }) {
   const [data, set] = useForm(
-    item ?? { name: '', asset_type: 'land', owner_id: defaultOwner, location: '', date: today(), value: '', photo: null, notes: '' },
+    item ?? { name: '', asset_type: 'land', owner_id: defaultOwner, location: '', date: today(), value: '', area: '', area_unit: 'timad', photo: null, notes: '' },
   );
   const [showErrors, setShowErrors] = useState(false);
 
@@ -323,6 +359,23 @@ export function AssetForm({ t, item, owners, defaultOwner, locations, onSave, on
             ))}
           </datalist>
         </Field>
+
+        {(data.asset_type === 'land' || data.asset_type === 'house') && (
+          <div className="field">
+            <span>{t('area')}</span>
+            <div className="area-input">
+              <input type="number" inputMode="decimal" min="0" step="0.01" value={data.area ?? ''} onChange={set('area')} />
+              <div className="unit-pick">
+                {AREA_UNITS.map((u) => (
+                  <button type="button" key={u} className={(data.area_unit || 'timad') === u ? 'on' : ''} onClick={() => set('area_unit')(u)}>
+                    {t(`u_${u}`)}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <span className="small muted">{t('areaHelp')}</span>
+          </div>
+        )}
 
         <div className="grid-2">
           <Field label={t('date')}>

@@ -307,3 +307,36 @@ tbody tr:hover { background: var(--green-soft); }
 .add-row { margin-top: 10px; padding: 8px 10px 0; border: 1px dashed var(--green); border-radius: 12px; background: #fbfdf9; }
 .add-label { font-weight: 700; color: var(--green); font-size: 0.9rem; }
 .add-row .edit-row { border-bottom: 0; }
+
+/* ---------- v3: sold / died, land area ---------- */
+.pos { color: var(--green); }
+.neg { color: var(--red); }
+em.pos, em.neg { font-style: normal; font-weight: 700; }
+
+/* Sold = black bar; died = greyed out */
+.card-sold { border-left: 6px solid #111; background: #f4f4f2; }
+.card-dead { border-left: 6px solid #9aa596; opacity: 0.6; }
+.card-dead strong { text-decoration: line-through; }
+.row-sold td:first-child { box-shadow: inset 5px 0 0 #111; }
+.row-sold { background: #f4f4f2; }
+.row-dead { opacity: 0.55; }
+.status.st-sold { background: #111; color: #fff; }
+.pill-sold { background: #111; color: #fff; }
+.pill-dead { background: #eee; color: var(--muted); }
+
+.status-seg { grid-template-columns: repeat(4, 1fr); }
+.status-seg button { min-height: 60px; }
+.status-seg button.on.seg-sold { background: #111; border-color: #111; color: #fff; }
+.status-seg button.on.seg-dead { background: #eee; border-color: #9aa596; color: var(--muted); }
+.status-block.is-sold { background: #f4f4f2; border-radius: 14px; padding: 10px; border-left: 6px solid #111; }
+.sale-box { display: grid; gap: 6px; margin-top: 10px; }
+.sale-box .field { margin-bottom: 0; }
+.sale-result { font-weight: 800; font-size: 1.05rem; }
+
+.area-input { display: flex; flex-wrap: wrap; gap: 8px; }
+.area-input input { flex: 1 1 120px; }
+.unit-pick { display: flex; gap: 4px; flex: 1 1 220px; }
+.unit-pick button {
+  flex: 1; border: 1px solid var(--line); background: var(--bg); border-radius: 12px; min-height: 48px; font-weight: 600; font-size: 0.85rem;
+}
+.unit-pick button.on { background: var(--green-soft); border-color: var(--green); color: var(--green); }

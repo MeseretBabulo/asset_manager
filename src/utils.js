@@ -62,6 +62,18 @@ export function forecastValue(record, types, atDate = new Date()) {
   return record.buy_price * (1 + (rate / 100) * monthsBetween(record.date, atDate));
 }
 
+// What a record is worth: sold = money received, died = 0, otherwise forecast
+export function recordValue(record, types, atDate = new Date()) {
+  if (record.status === 'sold') return record.sale_price || 0;
+  if (record.status === 'dead') return 0;
+  return forecastValue(record, types, atDate);
+}
+
+// ---------- Land area ----------
+const HA_PER_UNIT = { ha: 1, timad: 0.25, m2: 0.0001 };
+export const toHectares = (area, unit) => (Number(area) || 0) * (HA_PER_UNIT[unit] ?? 1);
+export const areaNum = (n) => new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 }).format(Number(n) || 0);
+
 // ---------- Photos: shrink before upload (phone photos are 3–8 MB) ----------
 export function compressImage(file, maxSize = 1280, quality = 0.75) {
   return new Promise((resolve, reject) => {

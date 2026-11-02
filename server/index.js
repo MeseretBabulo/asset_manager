@@ -52,6 +52,8 @@ db.exec(`
     photo          TEXT,
     notes          TEXT,
     owner_id       INTEGER,
+    sale_price     REAL,
+    sale_date      TEXT,
     created_at     TEXT    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at     TEXT    NOT NULL DEFAULT CURRENT_TIMESTAMP
   );
@@ -66,15 +68,23 @@ db.exec(`
     photo          TEXT,
     notes          TEXT,
     owner_id       INTEGER,
+    area           REAL,
+    area_unit      TEXT,
     created_at     TEXT    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at     TEXT    NOT NULL DEFAULT CURRENT_TIMESTAMP
   );
 `);
 
-// Migrate databases created by v1 (no owners)
-for (const table of ['records', 'assets']) {
-  const cols = db.prepare(`PRAGMA table_info(${table})`).all().map((c) => c.name);
-  if (!cols.includes('owner_id')) db.exec(`ALTER TABLE ${table} ADD COLUMN owner_id INTEGER`);
+// Migrate older databases: add any missing columns
+const MIGRATIONS = {
+  records: { owner_id: 'INTEGER', sale_price: 'REAL', sale_date: 'TEXT' },
+  assets: { owner_id: 'INTEGER', area: 'REAL', area_unit: 'TEXT' },
+};
+for (const [table, columns] of Object.entries(MIGRATIONS)) {
+  const have = db.prepare(`PRAGMA table_info(${table})`).all().map((c) => c.name);
+  for (const [col, type] of Object.entries(columns)) {
+    if (!have.includes(col)) db.exec(`ALTER TABLE ${table} ADD COLUMN ${col} ${type}`);
+  }
 }
 
 // Default owners (renamable in Settings)
@@ -122,6 +132,7 @@ db.exec(`UPDATE records SET owner_id = (SELECT MIN(id) FROM owners) WHERE owner_
 const CATEGORIES = ['cattle', 'sheep', 'goat', 'other'];
 const STATUSES = ['held', 'returned', 'sold', 'dead'];
 const ASSET_TYPES = ['land', 'house', 'vehicle', 'equipment', 'crop', 'other'];
+const AREA_UNITS = ['ha', 'timad', 'm2'];
 
 const str = (v, max = 200) => (v == null ? '' : String(v).trim().slice(0, max));
 const num = (v) => {
@@ -146,8 +157,16 @@ function cleanRecord(b) {
     status: str(b.status, 20) || 'held',
     notes: str(b.notes, 2000),
     owner_id: Number(b.owner_id) || null,
+    sale_price: null,
+    sale_date: null,
   };
   const errors = [];
+  if (r.status === 'sold') {
+    r.sale_price = num(b.sale_price);
+    r.sale_date = isDate(str(b.sale_date, 10)) ? str(b.sale_date, 10) : null;
+    if (!(r.sale_price > 0)) errors.push('sale_price');
+    if (!r.sale_date) errors.push('sale_date');
+  }
   if (!isDate(r.date)) errors.push('date');
   if (!r.receiver) errors.push('receiver');
   if (!r.location) errors.push('location');
@@ -167,7 +186,10 @@ function cleanAsset(b) {
     value: num(b.value),
     notes: str(b.notes, 2000),
     owner_id: Number(b.owner_id) || null,
+    area: num(b.area) || null,
+    area_unit: AREA_UNITS.includes(b.area_unit) ? b.area_unit : 'ha',
   };
+  if (!a.area) a.area_unit = null;
   const errors = [];
   if (!a.name) errors.push('name');
   if (!a.location) errors.push('location');

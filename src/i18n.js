@@ -105,6 +105,29 @@ export const TEXT = {
     totalValue: 'Total value',
     buyPriceOnly: 'Buy price (total for all)',
     perHead: 'per head',
+    // v3: selling, land area
+    salePrice: 'Sold for (total)',
+    saleDate: 'Date sold',
+    saleHelp: 'Enter the money you received. It is added to the total worth.',
+    soldFor: 'Sold',
+    gainOnSale: 'Gain',
+    lossOnSale: 'Loss',
+    deadNote: 'Died — value 0',
+    totalWorth: 'Total worth',
+    worthHelp: 'Animals you have now + money from sold animals',
+    nowValue: 'Animals now',
+    soldMoney: 'Sold money',
+    costHelp: 'All animals ever bought (incl. sold & died)',
+    soldSummary: 'Sold',
+    deadSummary: 'Died',
+    lossWord: 'loss',
+    headWord: 'head',
+    area: 'Size / area',
+    u_ha: 'Hectare',
+    u_timad: 'Timad',
+    u_m2: 'm²',
+    totalLand: 'Total land',
+    areaHelp: '1 timad ≈ 0.25 hectare · 1 hectare = 10,000 m²',
   },
   am: {
     appName: 'የንብረት መዝገብ',
@@ -204,12 +227,36 @@ export const TEXT = {
     totalValue: 'ጠቅላላ ዋጋ',
     buyPriceOnly: 'የተገዛበት ዋጋ (የሁሉም ድምር)',
     perHead: 'በአንድ ራስ',
+    salePrice: 'የተሸጠበት ዋጋ (ጠቅላላ)',
+    saleDate: 'የተሸጠበት ቀን',
+    saleHelp: 'የተቀበሉትን ገንዘብ ያስገቡ። ወደ ጠቅላላ ሀብት ይደመራል።',
+    soldFor: 'ተሸጠ',
+    gainOnSale: 'ትርፍ',
+    lossOnSale: 'ኪሳራ',
+    deadNote: 'ሞቷል — ዋጋ 0',
+    totalWorth: 'ጠቅላላ ሀብት',
+    worthHelp: 'አሁን ያሉ እንስሳት + ከተሸጡት የተገኘ ገንዘብ',
+    nowValue: 'አሁን ያሉ',
+    soldMoney: 'የሽያጭ ገንዘብ',
+    costHelp: 'የተገዙ ሁሉ (የተሸጡና የሞቱትን ጨምሮ)',
+    soldSummary: 'የተሸጡ',
+    deadSummary: 'የሞቱ',
+    lossWord: 'ኪሳራ',
+    headWord: 'ራስ',
+    area: 'ስፋት',
+    u_ha: 'ሄክታር',
+    u_timad: 'ጥማድ',
+    u_m2: 'ካሬ ሜትር',
+    totalLand: 'ጠቅላላ መሬት',
+    areaHelp: '1 ጥማድ ≈ 0.25 ሄክታር · 1 ሄክታር = 10,000 ካሬ ሜትር',
   },
 };
 
 export const CATEGORIES = ['cattle', 'sheep', 'goat', 'other'];
 export const STATUSES = ['held', 'returned', 'sold', 'dead'];
 export const OWNED_STATUSES = ['held', 'returned'];
+export const AREA_UNITS = ['ha', 'timad', 'm2'];
+export const STATUS_ICON = { held: '🤝', returned: '🏠', sold: '💰', dead: '✝️' };
 export const ASSET_TYPES = ['land', 'house', 'vehicle', 'equipment', 'crop', 'other'];
 
 export const CATEGORY_ICON = { cattle: '🐄', sheep: '🐑', goat: '🐐', other: '🐴' };

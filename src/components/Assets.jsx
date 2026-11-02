@@ -1,10 +1,12 @@
 import { useMemo } from 'react';
 import { ASSET_ICON, ASSET_TYPES, ownerName } from '../i18n.js';
-import { downloadCsv, formatDate, money } from '../utils.js';
+import { areaNum, downloadCsv, formatDate, money, toHectares } from '../utils.js';
 import OwnerChips from './OwnerChips.jsx';
 
 export default function Assets({ t, lang, owners, ownerFilter, setOwnerFilter, assets, loading, onOpen }) {
   const total = assets.reduce((s, a) => s + a.value, 0);
+  const landHa = assets.filter((a) => a.asset_type === 'land').reduce((s, a) => s + toHectares(a.area, a.area_unit), 0);
+  const areaText = (a) => (a.area ? `📐 ${areaNum(a.area)} ${t(`u_${a.area_unit || 'ha'}`)}` : '');
   const byType = useMemo(
     () =>
       ASSET_TYPES.map((type) => {
@@ -20,6 +22,7 @@ export default function Assets({ t, lang, owners, ownerFilter, setOwnerFilter, a
       { label: t('assetType'), value: (a) => t(`at_${a.asset_type}`) },
       { label: t('owner'), value: (a) => ownerName(owners, a.owner_id) },
       { label: t('location'), value: (a) => a.location },
+      { label: t('area'), value: (a) => (a.area ? `${a.area} ${t(`u_${a.area_unit || 'ha'}`)}` : '') },
       { label: t('date'), value: (a) => a.date },
       { label: t('value'), value: (a) => a.value },
       { label: t('notes'), value: (a) => a.notes },
@@ -40,6 +43,11 @@ export default function Assets({ t, lang, owners, ownerFilter, setOwnerFilter, a
           <span className="kpi-value">
             {money(total)} <small>{t('birr')}</small>
           </span>
+          {landHa > 0 && (
+            <span className="kpi-sub">
+              🌾 {t('totalLand')}: <b>{areaNum(landHa)}</b> {t('u_ha')} ({areaNum(landHa / 0.25)} {t('u_timad')})
+            </span>
+          )}
         </div>
         {byType.length > 0 && (
           <div className="type-strip">
@@ -71,7 +79,10 @@ export default function Assets({ t, lang, owners, ownerFilter, setOwnerFilter, a
                   <strong>{a.name}</strong>
                   <span className="status">{t(`at_${a.asset_type}`)}</span>
                 </div>
-                <div className="muted">📍 {a.location}</div>
+                <div className="muted">
+                  📍 {a.location}
+                  {a.area ? ` · ${areaText(a)}` : ''}
+                </div>
                 <div className="card-row muted small">
                   <span>
                     👤 {ownerName(owners, a.owner_id)}
