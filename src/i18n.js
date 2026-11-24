@@ -113,6 +113,15 @@ export const TEXT = {
     buyPriceOnly: 'Buy price (total for all)',
     perHead: 'per head',
     // v3: selling, land area
+    payment: 'Payment from receiver',
+    paymentShort: 'Payment',
+    pay_unpaid: 'Not paid',
+    pay_q1: '1/4 paid',
+    pay_q2: '2/4 paid',
+    pay_q3: '3/4 paid',
+    pay_paid: 'Paid in full',
+    paidAmount: 'Paid',
+    leftToPay: 'Left to pay',
     salePrice: 'Sold for (total)',
     saleDate: 'Date sold',
     saleHelp: 'Enter the money you received. It is added to the total worth.',
@@ -241,6 +250,15 @@ export const TEXT = {
     totalValue: 'ጠቅላላ ዋጋ',
     buyPriceOnly: 'የተገዛበት ዋጋ (የሁሉም ድምር)',
     perHead: 'በአንድ ራስ',
+    payment: 'የተረካቢ ክፍያ',
+    paymentShort: 'ክፍያ',
+    pay_unpaid: 'አልከፈለም',
+    pay_q1: '1/4 ከፍሏል',
+    pay_q2: '2/4 ከፍሏል',
+    pay_q3: '3/4 ከፍሏል',
+    pay_paid: 'ሙሉ ከፍሏል',
+    paidAmount: 'የተከፈለ',
+    leftToPay: 'ቀሪ',
     salePrice: 'የተሸጠበት ዋጋ (ጠቅላላ)',
     saleDate: 'የተሸጠበት ቀን',
     saleHelp: 'የተቀበሉትን ገንዘብ ያስገቡ። ወደ ጠቅላላ ሀብት ይደመራል።',
@@ -267,6 +285,9 @@ export const TEXT = {
 };
 
 export const CATEGORIES = ['cattle', 'sheep', 'goat', 'other'];
+// Receiver payment progress and the share of the price it represents
+export const PAYMENT_STATUSES = ['unpaid', 'q1', 'q2', 'q3', 'paid'];
+export const PAYMENT_SHARE = { unpaid: 0, q1: 0.25, q2: 0.5, q3: 0.75, paid: 1 };
 export const STATUSES = ['held', 'returned', 'sold', 'dead'];
 export const OWNED_STATUSES = ['held', 'returned'];
 export const AREA_UNITS = ['ha', 'timad', 'm2'];

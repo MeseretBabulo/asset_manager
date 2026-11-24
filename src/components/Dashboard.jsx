@@ -1,9 +1,13 @@
 import { useMemo, useState } from 'react';
 import { CATEGORIES, CATEGORY_ICON, OWNED_STATUSES, animalTypeLabel, ownerName } from '../i18n.js';
-import { addMonths, downloadCsv, isoDate, formatDate, money, recordValue } from '../utils.js';
+
+const PayBadge = ({ t, r }) => {
+  const st = r.payment_status || 'unpaid';
+  return <span className={`pay-badge pay-${st}`}>{t(`pay_${st}`)}</span>;
+};
+import { downloadCsv, formatDate, money, recordValue } from '../utils.js';
 import OwnerChips from './OwnerChips.jsx';
 
-const HORIZONS = [0, 3, 6, 12];
 
 // Cost = every animal ever bought. Worth = animals we still have (forecast) + money from sales. Died = 0.
 function summarize(records, types, atDate) {
@@ -56,9 +60,8 @@ function PriceLine({ t, r, types, today }) {
 export default function Dashboard({ t, lang, owners, ownerFilter, setOwnerFilter, records, allRecords, types, loading, onOpen }) {
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState('all');
-  const [horizon, setHorizon] = useState(0);
 
-  const atDate = useMemo(() => addMonths(new Date(), horizon), [horizon]);
+  const atDate = useMemo(() => new Date(), []);
   const kpi = useMemo(() => summarize(records, types, atDate), [records, types, atDate]);
   const perOwner = useMemo(
     () => owners.map((o) => ({ owner: o, ...summarize(allRecords.filter((r) => r.owner_id === o.id), types, atDate) })),
@@ -89,13 +92,12 @@ export default function Dashboard({ t, lang, owners, ownerFilter, setOwnerFilter
       { label: t('quantity'), value: (r) => r.quantity },
       { label: t('buyPrice'), value: (r) => r.buy_price },
       { label: t('estNow'), value: (r) => Math.round(recordValue(r, types, today)) },
+      { label: t('paymentShort'), value: (r) => t(`pay_${r.payment_status || 'unpaid'}`) },
       { label: t('status'), value: (r) => t(`st_${r.status}`) },
       { label: t('salePrice'), value: (r) => r.sale_price ?? '' },
       { label: t('saleDate'), value: (r) => r.sale_date ?? '' },
       { label: t('notes'), value: (r) => r.notes },
     ], filtered);
-
-  const gain = kpi.worth - kpi.cost;
 
   return (
     <>
@@ -120,28 +122,6 @@ export default function Dashboard({ t, lang, owners, ownerFilter, setOwnerFilter
               {CATEGORY_ICON.other} {t('other')}: {kpi.other}
             </span>
           )}
-        </div>
-        <div className="kpi kpi-wide kpi-forecast">
-          <span className="kpi-label">
-            {t('totalWorth')} · {horizon === 0 ? t('h_0') : formatDate(isoDate(atDate), lang)}
-          </span>
-          <span className="kpi-value">
-            {money(kpi.worth)} <small>{t('birr')}</small>
-          </span>
-          <span className="kpi-sub">
-            🐄 {t('nowValue')} {money(kpi.nowValue)} + 💰 {t('soldMoney')} {money(kpi.soldMoney)}
-          </span>
-          <span className={`kpi-sub ${gain >= 0 ? 'pos' : 'neg'}`}>
-            {t('profit')}: {gain >= 0 ? '+' : '−'}
-            {money(Math.abs(gain))} {t('birr')}
-          </span>
-          <div className="horizon" role="group" aria-label={t('horizon')}>
-            {HORIZONS.map((h) => (
-              <button key={h} className={horizon === h ? 'on' : ''} onClick={() => setHorizon(h)}>
-                {t(`h_${h}`)}
-              </button>
-            ))}
-          </div>
         </div>
         {(kpi.soldHead > 0 || kpi.deadHead > 0) && (
           <div className="type-strip">
@@ -215,7 +195,7 @@ export default function Dashboard({ t, lang, owners, ownerFilter, setOwnerFilter
                 </div>
                 <div className="card-row muted small">
                   <span>
-                    👤 {ownerName(owners, r.owner_id)} · {formatDate(r.date, lang)}
+                    👤 {ownerName(owners, r.owner_id)} · {formatDate(r.date, lang)} · <PayBadge t={t} r={r} />
                   </span>
                   <PriceLine t={t} r={r} types={types} today={today} />
                 </div>
@@ -236,6 +216,7 @@ export default function Dashboard({ t, lang, owners, ownerFilter, setOwnerFilter
                 <th>{t('animalType')}</th>
                 <th className="num">{t('quantity')}</th>
                 <th className="num">{t('buyPrice')}</th>
+                <th>{t('paymentShort')}</th>
                 <th className="num">{t('estNow')}</th>
                 <th>{t('status')}</th>
                 <th>{t('photo')}</th>
@@ -256,6 +237,9 @@ export default function Dashboard({ t, lang, owners, ownerFilter, setOwnerFilter
                   </td>
                   <td className="num">{r.quantity}</td>
                   <td className="num">{money(r.buy_price)}</td>
+                  <td>
+                    <PayBadge t={t} r={r} />
+                  </td>
                   <td className="num">
                     {r.status === 'sold' ? (
                       <>

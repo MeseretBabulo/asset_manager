@@ -97,7 +97,7 @@ h2 { font-size: 1.05rem; }
 .kpi-note { grid-column: span 3; font-size: 0.85rem; color: var(--muted); text-align: center; }
 
 @media (min-width: 700px) {
-  .kpis { grid-template-columns: repeat(3, 1fr) 1.4fr 1.4fr; }
+  .kpis { grid-template-columns: repeat(3, 1fr) 1.8fr; }
   .kpi-wide { grid-column: span 1; }
   .kpi-note { grid-column: span 5; }
 }
@@ -355,3 +355,10 @@ em.pos, em.neg { font-style: normal; font-weight: 700; }
 .login .lang-switch { background: var(--line); }
 .login .lang-switch button { color: var(--text); }
 .login .lang-switch button.on { background: var(--green); color: #fff; }
+
+/* ---------- receiver payment status ---------- */
+.pay-badge { display: inline-block; font-size: 0.75rem; font-weight: 700; padding: 1px 8px; border-radius: 999px; white-space: nowrap; }
+.pay-unpaid { background: #fde8e6; color: #b42318; border-color: #f1b8b2 !important; }
+.pay-q1, .pay-q2, .pay-q3 { background: #fff1d6; color: #8a5a00; border-color: #f0d48a !important; }
+.pay-paid { background: #e3efe2; color: #2f6b3a; border-color: #b9d8b6 !important; }
+.field select.pay-select { font-weight: 700; border-width: 2px; }

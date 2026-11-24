@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { AREA_UNITS, ASSET_ICON, ASSET_TYPES, CATEGORIES, CATEGORY_ICON, STATUSES, STATUS_ICON, typeName } from '../i18n.js';
+import { AREA_UNITS, ASSET_ICON, PAYMENT_SHARE, PAYMENT_STATUSES, ASSET_TYPES, CATEGORIES, CATEGORY_ICON, STATUSES, STATUS_ICON, typeName } from '../i18n.js';
 import { addMonths, compressImage, forecastValue, formatDate, money, today } from '../utils.js';
 
 // ---------- Shared pieces ----------
@@ -137,6 +137,7 @@ export function RecordForm({ t, lang, item, owners, types, defaultOwner, locatio
       quantity: 1,
       buy_price: '',
       status: 'held',
+      payment_status: 'unpaid',
       photo: null,
       notes: '',
     },
@@ -251,6 +252,26 @@ export function RecordForm({ t, lang, item, owners, types, defaultOwner, locatio
         <Field label={t('date')} required>
           <input type="date" value={data.date} onChange={set('date')} required />
           {lang === 'am' && data.date && <span className="hint">{formatDate(data.date, 'am')}</span>}
+        </Field>
+
+        <Field label={t('payment')}>
+          <select
+            className={`pay-select pay-${data.payment_status || 'unpaid'}`}
+            value={data.payment_status || 'unpaid'}
+            onChange={set('payment_status')}
+          >
+            {PAYMENT_STATUSES.map((st) => (
+              <option key={st} value={st}>
+                {t(`pay_${st}`)}
+              </option>
+            ))}
+          </select>
+          {Number(data.buy_price) > 0 && (
+            <span className="hint">
+              {t('paidAmount')}: {money(Number(data.buy_price) * PAYMENT_SHARE[data.payment_status || 'unpaid'])} ·{' '}
+              {t('leftToPay')}: {money(Number(data.buy_price) * (1 - PAYMENT_SHARE[data.payment_status || 'unpaid']))} {t('birr')}
+            </span>
+          )}
         </Field>
 
         <Field label={`${t('buyPriceOnly')} (${t('birr')})`}>

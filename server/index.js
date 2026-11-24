@@ -54,6 +54,7 @@ db.exec(`
     owner_id       INTEGER,
     sale_price     REAL,
     sale_date      TEXT,
+    payment_status TEXT    NOT NULL DEFAULT 'unpaid',
     created_at     TEXT    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at     TEXT    NOT NULL DEFAULT CURRENT_TIMESTAMP
   );
@@ -77,7 +78,7 @@ db.exec(`
 
 // Migrate older databases: add any missing columns
 const MIGRATIONS = {
-  records: { owner_id: 'INTEGER', sale_price: 'REAL', sale_date: 'TEXT' },
+  records: { owner_id: 'INTEGER', sale_price: 'REAL', sale_date: 'TEXT', payment_status: "TEXT NOT NULL DEFAULT 'unpaid'" },
   assets: { owner_id: 'INTEGER', area: 'REAL', area_unit: 'TEXT' },
 };
 for (const [table, columns] of Object.entries(MIGRATIONS)) {
@@ -131,6 +132,8 @@ db.exec(`UPDATE records SET owner_id = (SELECT MIN(id) FROM owners) WHERE owner_
 // ---------- Validation ----------
 const CATEGORIES = ['cattle', 'sheep', 'goat', 'other'];
 const STATUSES = ['held', 'returned', 'sold', 'dead'];
+// How much the receiver (ተረካቢ) has paid: not yet, 1/4, 2/4, 3/4, in full
+const PAYMENT_STATUSES = ['unpaid', 'q1', 'q2', 'q3', 'paid'];
 const ASSET_TYPES = ['land', 'house', 'vehicle', 'equipment', 'crop', 'other'];
 const AREA_UNITS = ['ha', 'timad', 'm2'];
 
@@ -159,6 +162,7 @@ function cleanRecord(b) {
     owner_id: Number(b.owner_id) || null,
     sale_price: null,
     sale_date: null,
+    payment_status: PAYMENT_STATUSES.includes(b.payment_status) ? b.payment_status : 'unpaid',
   };
   const errors = [];
   if (r.status === 'sold') {
