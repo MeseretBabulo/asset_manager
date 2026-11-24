@@ -1,4 +1,6 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+
+const PAGE_SIZE = 8;
 import { CATEGORIES, CATEGORY_ICON, OWNED_STATUSES, animalTypeLabel, colorInfo, ownerName } from '../i18n.js';
 import { Swatch } from './ColorPicker.jsx';
 
@@ -29,7 +31,10 @@ function summarize(records, types, atDate) {
   const count = (c) => sum(owned.filter((r) => r.category === c), (r) => r.quantity);
   const nowValue = sum(owned, (r) => recordValue(r, types, atDate));
   const soldMoney = sum(sold, (r) => r.sale_price || 0);
+  const rows = (c) => owned.filter((r) => r.category === c).length;
   return {
+    total: count('cattle') + count('sheep') + count('goat') + count('other'),
+    rows: { cattle: rows('cattle'), sheep: rows('sheep'), goat: rows('goat') },
     cattle: count('cattle'),
     sheep: count('sheep'),
     goat: count('goat'),
@@ -88,6 +93,30 @@ export default function Dashboard({ t, lang, owners, ownerFilter, setOwnerFilter
     );
   }, [records, query, category, lang]);
 
+  // Records per filter chip (respects the search box)
+  const chipCount = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    const hit = (r) => !q || [r.receiver, r.location, r.phone, r.notes, colorInfo(r.color, lang).label].some((v) => v?.toLowerCase().includes(q));
+    const out = { all: 0 };
+    records.forEach((r) => {
+      if (!hit(r)) return;
+      out.all += 1;
+      out[r.category] = (out[r.category] || 0) + 1;
+    });
+    return out;
+  }, [records, query, lang]);
+
+  const [page, setPage] = useState(1);
+  const listRef = useRef(null);
+  const goPage = (n) => {
+    setPage(n);
+    listRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+  useEffect(() => setPage(1), [query, category, records.length]);
+  const pages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const curPage = Math.min(page, pages);
+  const shown = filtered.slice((curPage - 1) * PAGE_SIZE, curPage * PAGE_SIZE);
+
   const typeLabel = (r) => animalTypeLabel(types, r.animal_type, lang) || t(r.category);
   const today = new Date();
 
@@ -121,8 +150,18 @@ export default function Dashboard({ t, lang, owners, ownerFilter, setOwnerFilter
             <span className="kpi-icon">{CATEGORY_ICON[c]}</span>
             <span className="kpi-value">{kpi[c]}</span>
             <span className="kpi-label">{t(c)}</span>
+            {kpi.rows[c] !== kpi[c] && (
+              <span className="kpi-sub">
+                {kpi.rows[c]} {t('recordsWord')}
+              </span>
+            )}
           </div>
         ))}
+        <div className="kpi kpi-total">
+          <span className="kpi-icon">🧮</span>
+          <span className="kpi-value">{kpi.total}</span>
+          <span className="kpi-label">{t('totalAnimals')}</span>
+        </div>
         <div className="kpi kpi-wide kpi-money">
           <span className="kpi-label">{t('totalCost')}</span>
           <span className="kpi-value">
@@ -172,7 +211,7 @@ export default function Dashboard({ t, lang, owners, ownerFilter, setOwnerFilter
         </section>
       )}
 
-      <section className="panel">
+      <section className="panel" ref={listRef} style={{ scrollMarginTop: 70 }}>
         <div className="panel-head">
           <h2>{t('records')}</h2>
           <button className="chip" onClick={exportCsv} disabled={!filtered.length}>
@@ -185,7 +224,7 @@ export default function Dashboard({ t, lang, owners, ownerFilter, setOwnerFilter
         <div className="filters">
           {['all', ...CATEGORIES].map((c) => (
             <button key={c} className={`chip ${category === c ? 'chip-on' : ''}`} onClick={() => setCategory(c)}>
-              {c === 'all' ? t('all') : `${CATEGORY_ICON[c]} ${t(c)}`}
+              {c === 'all' ? t('all') : `${CATEGORY_ICON[c]} ${t(c)}`} <span className="chip-count">{chipCount[c] || 0}</span>
             </button>
           ))}
         </div>
@@ -194,7 +233,7 @@ export default function Dashboard({ t, lang, owners, ownerFilter, setOwnerFilter
 
         {/* Mobile: cards */}
         <ul className="cards">
-          {filtered.map((r) => (
+          {shown.map((r) => (
             <li key={r.id} className={`card card-${r.status}`} onClick={() => onOpen(r)}>
               {r.photo ? <img className="thumb" src={r.photo} alt="" loading="lazy" /> : <span className="thumb thumb-icon">{CATEGORY_ICON[r.category]}</span>}
               <div className="card-body">
@@ -235,7 +274,7 @@ export default function Dashboard({ t, lang, owners, ownerFilter, setOwnerFilter
               </tr>
             </thead>
             <tbody>
-              {filtered.map((r) => (
+              {shown.map((r) => (
                 <tr key={r.id} className={`row-${r.status}`} onClick={() => onOpen(r)}>
                   <td>{formatDate(r.date, lang)}</td>
                   <td>{ownerName(owners, r.owner_id)}</td>
@@ -270,6 +309,20 @@ export default function Dashboard({ t, lang, owners, ownerFilter, setOwnerFilter
             </tbody>
           </table>
         </div>
+
+        {filtered.length > PAGE_SIZE && (
+          <div className="pager">
+            <button className="btn" disabled={curPage <= 1} onClick={() => goPage(curPage - 1)}>
+              ‹ {t('prevPage')}
+            </button>
+            <span className="pager-info">
+              {(curPage - 1) * PAGE_SIZE + 1}–{Math.min(curPage * PAGE_SIZE, filtered.length)} / {filtered.length}
+            </span>
+            <button className="btn" disabled={curPage >= pages} onClick={() => goPage(curPage + 1)}>
+              {t('nextPage')} ›
+            </button>
+          </div>
+        )}
       </section>
     </>
   );

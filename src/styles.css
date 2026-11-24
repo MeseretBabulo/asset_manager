@@ -39,7 +39,7 @@ h2 { font-size: 1.05rem; }
 .empty { text-align: center; color: var(--muted); padding: 28px 8px; }
 
 /* ---------- Layout ---------- */
-.app { max-width: 1100px; margin: 0 auto; padding-bottom: calc(96px + env(safe-area-inset-bottom)); }
+.app { max-width: 1100px; margin: 0 auto; padding-bottom: calc(150px + env(safe-area-inset-bottom)); }
 
 .topbar {
   position: sticky; top: 0; z-index: 10;
@@ -78,7 +78,8 @@ h2 { font-size: 1.05rem; }
 .icon-btn { border: 0; background: transparent; font-size: 1.3rem; width: 44px; height: 44px; border-radius: 50%; }
 
 /* ---------- KPIs ---------- */
-.kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.kpi-total { border-top: 4px solid var(--green); }
 .kpi {
   background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow);
   padding: 12px 10px; display: flex; flex-direction: column; align-items: center; text-align: center; min-width: 0;
@@ -87,19 +88,18 @@ h2 { font-size: 1.05rem; }
 .kpi-value { font-size: 1.7rem; font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1.2; margin-top: 4px; }
 .kpi-value small { font-size: 0.85rem; font-weight: 600; color: var(--muted); }
 .kpi-label { font-size: 0.85rem; color: var(--muted); font-weight: 600; }
-.kpi-wide { grid-column: span 3; align-items: flex-start; text-align: left; padding: 14px 16px; }
+.kpi-wide { grid-column: 1 / -1; align-items: flex-start; text-align: left; padding: 14px 16px; }
 .kpi-wide .kpi-value { font-size: 1.6rem; }
 .kpi-sub { font-size: 0.82rem; color: var(--muted); }
 .kpi-sub.pos { color: var(--green); font-weight: 600; }
 .kpi-sub.neg { color: var(--red); font-weight: 600; }
 .kpi-money { border-left: 5px solid var(--gold); }
 .kpi-forecast { border-left: 5px solid var(--green); }
-.kpi-note { grid-column: span 3; font-size: 0.85rem; color: var(--muted); text-align: center; }
+.kpi-note { grid-column: 1 / -1; font-size: 0.85rem; color: var(--muted); text-align: center; }
 
 @media (min-width: 700px) {
-  .kpis { grid-template-columns: repeat(3, 1fr) 1.8fr; }
+  .kpis { grid-template-columns: repeat(4, 1fr) 1.8fr; gap: 10px; }
   .kpi-wide { grid-column: span 1; }
-  .kpi-note { grid-column: span 5; }
 }
 
 /* ---------- Panel / list ---------- */
@@ -381,3 +381,11 @@ em.pos, em.neg { font-style: normal; font-weight: 700; }
 .color-name small { display: block; font-size: 0.75rem; color: var(--muted); }
 .color-list .swatch { width: 24px; height: 24px; }
 .color-add { color: var(--green); font-weight: 600; border-bottom: 1px solid var(--line); border-radius: 8px 8px 0 0 !important; }
+
+/* Chip counts & pagination */
+.chip-count { display: inline-block; min-width: 1.6em; padding: 0 6px; margin-left: 4px; border-radius: 999px; background: var(--green-soft); color: var(--green); font-size: 0.78rem; font-weight: 700; text-align: center; }
+.chip-on .chip-count { background: rgba(255, 255, 255, 0.25); color: #fff; }
+.pager { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 12px; }
+.pager .btn { min-width: 96px; }
+.pager-info { color: var(--muted); font-weight: 600; font-variant-numeric: tabular-nums; }
+@media (max-width: 420px) { .kpi { padding: 10px 4px; } .kpi-value { font-size: 1.45rem; } .kpi-label { font-size: 0.78rem; } }
