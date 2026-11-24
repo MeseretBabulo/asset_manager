@@ -362,3 +362,22 @@ em.pos, em.neg { font-style: normal; font-weight: 700; }
 .pay-q1, .pay-q2, .pay-q3 { background: #fff1d6; color: #8a5a00; border-color: #f0d48a !important; }
 .pay-paid { background: #e3efe2; color: #2f6b3a; border-color: #b9d8b6 !important; }
 .field select.pay-select { font-weight: 700; border-width: 2px; }
+
+/* ---------- animal colour picker ---------- */
+.swatch { display: inline-block; width: 18px; height: 18px; border-radius: 50%; border: 1px solid rgba(0, 0, 0, 0.25); flex: none; vertical-align: -4px; }
+.swatch-custom { background: repeating-linear-gradient(45deg, #e9e4d8 0 4px, #f8f6f0 4px 8px); border-style: dashed; }
+.color-tag { display: inline-flex; align-items: center; gap: 4px; font-size: 0.85em; color: var(--muted); white-space: nowrap; }
+.color-tag .swatch { width: 12px; height: 12px; vertical-align: 0; }
+.color-picker { position: relative; }
+.color-input { display: flex; align-items: center; gap: 8px; border: 1px solid var(--line); border-radius: 12px; background: #fff; padding: 0 6px 0 12px; min-height: 48px; }
+.color-input.open, .color-input:focus-within { outline: 2px solid var(--green); border-color: var(--green); }
+.field .color-input input { border: 0; outline: none; padding: 10px 0; min-height: 44px; flex: 1; min-width: 0; background: transparent; }
+.color-clear, .color-caret { border: 0; background: transparent; color: var(--muted); font-size: 1rem; width: 32px; height: 36px; border-radius: 8px; flex: none; }
+.color-clear:hover, .color-caret:hover { background: var(--bg); }
+.color-list { list-style: none; margin: 4px 0 0; padding: 4px; position: absolute; left: 0; right: 0; z-index: 5; background: #fff; border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 10px 24px rgba(0, 0, 0, 0.14); max-height: 240px; overflow-y: auto; }
+.color-list li { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 9px 10px; border-radius: 8px; cursor: pointer; min-height: 44px; }
+.color-list li:hover, .color-list li.sel { background: var(--green-soft); }
+.color-list li.sel .color-name { font-weight: 700; color: var(--green); }
+.color-name small { display: block; font-size: 0.75rem; color: var(--muted); }
+.color-list .swatch { width: 24px; height: 24px; }
+.color-add { color: var(--green); font-weight: 600; border-bottom: 1px solid var(--line); border-radius: 8px 8px 0 0 !important; }

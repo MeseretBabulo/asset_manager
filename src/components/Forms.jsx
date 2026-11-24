@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { AREA_UNITS, ASSET_ICON, PAYMENT_SHARE, PAYMENT_STATUSES, ASSET_TYPES, CATEGORIES, CATEGORY_ICON, STATUSES, STATUS_ICON, typeName } from '../i18n.js';
+import ColorPicker from './ColorPicker.jsx';
 import { addMonths, compressImage, forecastValue, formatDate, money, today } from '../utils.js';
 
 // ---------- Shared pieces ----------
@@ -123,7 +124,7 @@ function OwnerPicker({ t, owners, value, onChange }) {
 }
 
 // ---------- Livestock record ----------
-export function RecordForm({ t, lang, item, owners, types, defaultOwner, locations, receivers, onSave, onDelete, onClose }) {
+export function RecordForm({ t, lang, item, owners, types, defaultOwner, locations, receivers, colors = [], onSave, onDelete, onClose }) {
   const typesOf = (c) => types.filter((x) => x.category === c);
   const [data, set, setData] = useForm(
     item ?? {
@@ -138,6 +139,7 @@ export function RecordForm({ t, lang, item, owners, types, defaultOwner, locatio
       buy_price: '',
       status: 'held',
       payment_status: 'unpaid',
+      color: '',
       photo: null,
       notes: '',
     },
@@ -254,26 +256,6 @@ export function RecordForm({ t, lang, item, owners, types, defaultOwner, locatio
           {lang === 'am' && data.date && <span className="hint">{formatDate(data.date, 'am')}</span>}
         </Field>
 
-        <Field label={t('payment')}>
-          <select
-            className={`pay-select pay-${data.payment_status || 'unpaid'}`}
-            value={data.payment_status || 'unpaid'}
-            onChange={set('payment_status')}
-          >
-            {PAYMENT_STATUSES.map((st) => (
-              <option key={st} value={st}>
-                {t(`pay_${st}`)}
-              </option>
-            ))}
-          </select>
-          {Number(data.buy_price) > 0 && (
-            <span className="hint">
-              {t('paidAmount')}: {money(Number(data.buy_price) * PAYMENT_SHARE[data.payment_status || 'unpaid'])} ·{' '}
-              {t('leftToPay')}: {money(Number(data.buy_price) * (1 - PAYMENT_SHARE[data.payment_status || 'unpaid']))} {t('birr')}
-            </span>
-          )}
-        </Field>
-
         <Field label={`${t('buyPriceOnly')} (${t('birr')})`}>
           <input type="number" inputMode="decimal" min="0" value={data.buy_price} onChange={set('buy_price')} />
           {preview.buy_price > 0 && (
@@ -298,6 +280,11 @@ export function RecordForm({ t, lang, item, owners, types, defaultOwner, locatio
           )}
         </Field>
 
+        <div className="field">
+          <span>{t('color')}</span>
+          <ColorPicker t={t} lang={lang} value={data.color || ''} extra={colors} onChange={set('color')} />
+        </div>
+
         <Field label={t('receiver')} required>
           <input value={data.receiver} onChange={set('receiver')} list="receivers" required autoComplete="off" />
           <datalist id="receivers">
@@ -305,6 +292,26 @@ export function RecordForm({ t, lang, item, owners, types, defaultOwner, locatio
               <option key={r} value={r} />
             ))}
           </datalist>
+        </Field>
+
+        <Field label={t('payment')}>
+          <select
+            className={`pay-select pay-${data.payment_status || 'unpaid'}`}
+            value={data.payment_status || 'unpaid'}
+            onChange={set('payment_status')}
+          >
+            {PAYMENT_STATUSES.map((st) => (
+              <option key={st} value={st}>
+                {t(`pay_${st}`)}
+              </option>
+            ))}
+          </select>
+          {Number(data.buy_price) > 0 && (
+            <span className="hint">
+              {t('paidAmount')}: {money(Number(data.buy_price) * PAYMENT_SHARE[data.payment_status || 'unpaid'])} ·{' '}
+              {t('leftToPay')}: {money(Number(data.buy_price) * (1 - PAYMENT_SHARE[data.payment_status || 'unpaid']))} {t('birr')}
+            </span>
+          )}
         </Field>
 
         <Field label={t('phone')}>

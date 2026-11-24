@@ -113,6 +113,9 @@ export const TEXT = {
     buyPriceOnly: 'Buy price (total for all)',
     perHead: 'per head',
     // v3: selling, land area
+    color: 'Colour',
+    colorPlaceholder: 'Choose or type a colour…',
+    addColor: 'Add new colour',
     payment: 'Payment from receiver',
     paymentShort: 'Payment',
     pay_unpaid: 'Not paid',
@@ -250,6 +253,9 @@ export const TEXT = {
     totalValue: 'ጠቅላላ ዋጋ',
     buyPriceOnly: 'የተገዛበት ዋጋ (የሁሉም ድምር)',
     perHead: 'በአንድ ራስ',
+    color: 'ቀለም',
+    colorPlaceholder: 'ቀለም ይምረጡ ወይም ይጻፉ…',
+    addColor: 'አዲስ ቀለም ጨምር',
     payment: 'የተረካቢ ክፍያ',
     paymentShort: 'ክፍያ',
     pay_unpaid: 'አልከፈለም',
@@ -285,6 +291,26 @@ export const TEXT = {
 };
 
 export const CATEGORIES = ['cattle', 'sheep', 'goat', 'other'];
+// Animal coat colours (key is stored; a typed colour is stored as its own text)
+export const COLORS = [
+  { key: 'black', am: 'ጥቁር', en: 'Black', css: '#222222' },
+  { key: 'white', am: 'ነጭ', en: 'White', css: '#ffffff' },
+  { key: 'red', am: 'ቀይ', en: 'Red', css: '#a8322d' },
+  { key: 'brown', am: 'ቡናማ', en: 'Brown', css: '#6b4226' },
+  { key: 'yellow', am: 'ቢጫ', en: 'Yellow / tan', css: '#d9a93b' },
+  { key: 'grey', am: 'ግራጫ', en: 'Grey', css: '#8a8a8a' },
+  { key: 'dalecha', am: 'ዳለቻ', en: 'Ash / dun', css: '#b9a58b' },
+  { key: 'gurach', am: 'ጉራች', en: 'Black & white', css: 'linear-gradient(135deg, #222222 50%, #ffffff 50%)' },
+  { key: 'red_white', am: 'ቀይና ነጭ', en: 'Red & white', css: 'linear-gradient(135deg, #a8322d 50%, #ffffff 50%)' },
+  { key: 'spotted', am: 'ዥጉርጉር', en: 'Spotted', css: 'radial-gradient(circle at 30% 35%, #222 0 22%, transparent 23%), radial-gradient(circle at 70% 68%, #6b4226 0 20%, transparent 21%), #f3efe6' },
+];
+
+export function colorInfo(value, lang) {
+  if (!value) return { label: '', css: null };
+  const c = COLORS.find((x) => x.key === value);
+  return c ? { label: lang === 'en' ? c.en : c.am, css: c.css } : { label: value, css: null };
+}
+
 // Receiver payment progress and the share of the price it represents
 export const PAYMENT_STATUSES = ['unpaid', 'q1', 'q2', 'q3', 'paid'];
 export const PAYMENT_SHARE = { unpaid: 0, q1: 0.25, q2: 0.5, q3: 0.75, paid: 1 };

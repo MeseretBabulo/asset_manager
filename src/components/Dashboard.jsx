@@ -1,5 +1,16 @@
 import { useMemo, useState } from 'react';
-import { CATEGORIES, CATEGORY_ICON, OWNED_STATUSES, animalTypeLabel, ownerName } from '../i18n.js';
+import { CATEGORIES, CATEGORY_ICON, OWNED_STATUSES, animalTypeLabel, colorInfo, ownerName } from '../i18n.js';
+import { Swatch } from './ColorPicker.jsx';
+
+const ColorTag = ({ lang, value }) => {
+  if (!value) return null;
+  const c = colorInfo(value, lang);
+  return (
+    <span className="color-tag">
+      <Swatch css={c.css} /> {c.label}
+    </span>
+  );
+};
 
 const PayBadge = ({ t, r }) => {
   const st = r.payment_status || 'unpaid';
@@ -73,9 +84,9 @@ export default function Dashboard({ t, lang, owners, ownerFilter, setOwnerFilter
     return records.filter(
       (r) =>
         (category === 'all' || r.category === category) &&
-        (!q || [r.receiver, r.location, r.phone, r.notes].some((v) => v?.toLowerCase().includes(q))),
+        (!q || [r.receiver, r.location, r.phone, r.notes, colorInfo(r.color, lang).label].some((v) => v?.toLowerCase().includes(q))),
     );
-  }, [records, query, category]);
+  }, [records, query, category, lang]);
 
   const typeLabel = (r) => animalTypeLabel(types, r.animal_type, lang) || t(r.category);
   const today = new Date();
@@ -89,6 +100,7 @@ export default function Dashboard({ t, lang, owners, ownerFilter, setOwnerFilter
       { label: t('location'), value: (r) => r.location },
       { label: t('category'), value: (r) => t(r.category) },
       { label: t('animalType'), value: typeLabel },
+      { label: t('color'), value: (r) => colorInfo(r.color, lang).label },
       { label: t('quantity'), value: (r) => r.quantity },
       { label: t('buyPrice'), value: (r) => r.buy_price },
       { label: t('estNow'), value: (r) => Math.round(recordValue(r, types, today)) },
@@ -191,7 +203,7 @@ export default function Dashboard({ t, lang, owners, ownerFilter, setOwnerFilter
                   <span className={`status st-${r.status}`}>{t(`st_${r.status}`)}</span>
                 </div>
                 <div className="muted">
-                  {r.quantity} × {typeLabel(r)} · 📍 {r.location}
+                  {r.quantity} × {typeLabel(r)} <ColorTag lang={lang} value={r.color} /> · 📍 {r.location}
                 </div>
                 <div className="card-row muted small">
                   <span>
@@ -233,7 +245,7 @@ export default function Dashboard({ t, lang, owners, ownerFilter, setOwnerFilter
                   </td>
                   <td>{r.location}</td>
                   <td>
-                    {CATEGORY_ICON[r.category]} {typeLabel(r)}
+                    {CATEGORY_ICON[r.category]} {typeLabel(r)} <ColorTag lang={lang} value={r.color} />
                   </td>
                   <td className="num">{r.quantity}</td>
                   <td className="num">{money(r.buy_price)}</td>

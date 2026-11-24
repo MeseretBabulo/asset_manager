@@ -211,6 +211,7 @@ export default function App() {
           owners={owners}
           types={types}
           defaultOwner={defaultOwner}
+          colors={records.map((r) => r.color).filter(Boolean)}
           locations={[...new Set(records.map((r) => r.location))]}
           receivers={[...new Set(records.map((r) => r.receiver))]}
           onSave={(d) => save('records', d)}
